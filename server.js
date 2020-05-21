@@ -3,11 +3,16 @@ var express = require('express'),
     port = process.env.PORT || 3000;
     mongoose = require('mongoose'),
     Anime = require('./api/models/animeModel')
-    bodyParser = require('body-parser');
+    AnimeEpisode = require('./api/models/animeEpisodeModel')
+    Download = require('./api/models/downloadModel')
+    File = require('./api/models/fileModel')
+
+    bodyParser = require('body-parser')
+    mockFunctions = require('./api/utils/mockFunctions');
 
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/BabylonAnime'); 
+mongoose.connect('mongodb://localhost/BabylonAnime', { useNewUrlParser: true, useUnifiedTopology: true }); 
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -23,3 +28,5 @@ app.use(function(req, res) {
 });
 
 console.log('AnimeAPI started on port ' + port);
+
+mockFunctions.createCompleteAnime();
