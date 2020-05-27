@@ -1,6 +1,7 @@
 'use strict'
 
 exports.searchAnimeOnNya = async function(title, ep, quality, format) {
+    let v = require('./verifyFunctions');
     /**
      * TODO : Search for multi-lang
      */
@@ -13,11 +14,6 @@ exports.searchAnimeOnNya = async function(title, ep, quality, format) {
     // Only Non-English-Translated
     let category = '1_2';
 
-    // regex to get string that contain TITLE and are not TITLE
-    let regexNotStrictQuery = `([a-zA-Z]${title}[a-zA-Z])|(${title}[a-zA-Z0])|([a-zA-Z0]${title})`;
-    let regexNotStrict = new RegExp(regexNotStrictQuery, 'gmi');
-    // regex to get string that contain EP or 0+EP
-    let regexEpisode = new RegExp(`\\D${ep}\\D|\\D0${ep}\\D`,'gmi');
     
     /* Fetching Nya */
     let opt = {
@@ -42,15 +38,16 @@ exports.searchAnimeOnNya = async function(title, ep, quality, format) {
             let dlLink = domain + $(this).find("td:nth-child(3) a:nth-child(2)").attr("href");
             let magnet = $(this).find("td:nth-child(3) a:nth-child(2)").attr("href");
             if(name) {
+                let score = v.getMatchingScore(name,title,ep);
                 // If the matched element isn't strict and match the wanted episode 
-                if(name.match(regexNotStrict) && name.match(regexEpisode)) {
+                if(score === 1) {
                     // If no object have already been found
                     if(!foundObject) {
                         foundObject = {name, dlLink, magnet, strict: false}
                     }
                 } 
                 // Or it's strict and match the wanted episode
-                else if(name.match(regexEpisode)) {
+                else if(score === 3) {
                     foundObject = {name, dlLink, magnet, strict: true}
                     foundWithStrict = true;
                 }
