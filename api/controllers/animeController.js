@@ -7,7 +7,7 @@ var mongoose = require('mongoose'),
 // ==================== ASYNC FUNCTIONS ====================
 // =========================================================
 
-exports.getAllAnime = async function() {
+exports.getAllAnimes = async function() {
     return new Promise(( resolve, reject) => {
         Anime.find({}, function (err, anime) {
             if(err)
@@ -62,8 +62,8 @@ exports.deleteAnime = async function(animeId) {
 // =========================================================
 
 
-exports.get_all_anime = function (req, res) {
-    getAllAnime().then(res.json).catch(res.send);
+exports.get_all_animes = function (req, res) {
+    getAll().then(res.json).catch(res.send);
 };
 
 
