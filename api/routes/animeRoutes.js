@@ -1,15 +1,16 @@
-'use strict';
-module.exports = function(app) {
-  var anime = require('../controllers/animeController');
+"use strict";
+module.exports = function (app) {
+  var anime = require("../controllers/animeController");
+  app
+    .route("/animes")
+    .get(anime.api.get_all_animes)
+    .post(anime.api.create_anime);
 
-  // todoList Routes
-  app.route('/animes')
-    .get(anime.get_all_anime)
-    .post(anime.create_anime);
+  app
+    .route("/animes/:animeId")
+    .get(anime.api.get_anime)
+    .put(anime.api.update_anime)
+    .delete(anime.api.delete_anime);
 
-
-  app.route('/anime/:animeId')
-    .get(anime.get_anime)
-    .put(anime.update_anime)
-    .delete(anime.delete_anime);
+  app.route("/animes/:animeId/episodes").get(anime.api.get_anime_episodes);
 };

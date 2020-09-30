@@ -1,23 +1,28 @@
 'use strict'
 
-exports.getValidFiles = function(torrent) {
+const getValidFiles = function(torrent) {
     // .ass are the subtitles
     let validExt = [".mp4",".mkv",".ass"];
     function rightExtensions(name) {
         let isOk = false;
         validExt.forEach(ext => {
-            if(name.endsWith(ext)) {
+            if(!isOk && name.endsWith(ext)) {
                 isOk = true;
-                break;
             }
         });
         return isOk;
     }
-    return torrent.filter((f) => rightExtensions(f.name));
+    return torrent.files.filter((f) => rightExtensions(f.name));
 }
 
+/**
+ * Start downloading torrent files from magnet
+ * @param client : torrent client
+ * @param magnet : torrent magnet
+ * @return : filesPromise = files that are being downloaded | downloadDonePromise = when all dl are done or rejected on error
+ */ 
 exports.downloadFiles = function(client, magnet) {
-    let torrent = client.add(magnet);
+    let torrent = client.add(magnet, {path:'/#Dev/AnimeDownloaderServer/BabylonAnimeApi/files'});
     let promises = {filesPromise:null, downloadDonePromise:null};
 
     promises.filesPromise = new Promise( (resolve) => {

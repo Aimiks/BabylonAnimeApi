@@ -1,9 +1,9 @@
 'use strict';
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 
-var AnimeEpisodeSchema = new Schema({
+const AnimeEpisodeSchema = new Schema({
     episodeNumber: Number,
     anime: {type: Schema.Types.ObjectId, ref: 'Anime'},
     download: [{type: Schema.Types.ObjectId, ref:'Download'}]

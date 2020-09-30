@@ -4,7 +4,9 @@ var mongoose = require('mongoose'),
     Anime = mongoose.model('Anime'),
     AnimeFile = mongoose.model('File'),
     AnimeEpisode = mongoose.model('AnimeEpisode'),
-    Download = mongoose.model('Download');
+    Download = mongoose.model('Download'),
+    clientDLController = require("../../downloader/downloader"),
+    animeController = require("../../api/controllers/animeController");
 
 exports.createCompleteAnime = async function() {
     console.log("Creating mock anime...");
@@ -138,5 +140,34 @@ exports.createCompleteAnime = async function() {
 
 
 
+
+}
+
+exports.downloadAnimeEpisode = async function(client) {
+    console.log("[mock::downloadAnimeEpisode] - Begin");
+    await Anime.deleteMany({}).exec();
+    await AnimeEpisode.deleteMany({}).exec();
+    await Download.deleteMany({}).exec();
+    await AnimeFile.deleteMany({}).exec();
+    let mockAnimeInfos = {
+        romajiName: "Honzuki no Gekokujou",
+        anilistLink: "https://anilist.co/anime/97940/Black-Clover/",
+        imagePath: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx97940-cmgkiM9APwu6.jpg",
+        episode: [],
+        status: "releasing"
+    };
+    console.log("[mock::downloadAnimeEpisode] - Creating anime");
+    let mockAnime = await animeController.createAnime(mockAnimeInfos);
+    const mockAnimeFilter = {
+        animeId: mockAnime._id,
+        title: 'Honzuki no Gekokujou',
+        ep: 23,
+        quality: 720,
+        format: 'mkv'
+    };
+    console.log("[mock::downloadAnimeEpisode] - Downloading anime...");
+    await clientDLController.downloadAnimeEpisode(client,mockAnimeFilter.animeId,mockAnimeFilter.title,mockAnimeFilter.ep,mockAnimeFilter.quality,mockAnimeFilter.format);
+    console.log(await animeController.getAllAnimes());
+    console.log("[mock::downloadAnimeEpisode] - End");
 
 }

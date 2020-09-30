@@ -2,6 +2,8 @@
 
 exports.searchAnimeOnNya = async function(title, ep, quality, format) {
     let v = require('./verifyFunctions');
+    const fetch = require("node-fetch");
+    const cheerio = require('cheerio');
     /**
      * TODO : Search for multi-lang
      */
@@ -27,6 +29,7 @@ exports.searchAnimeOnNya = async function(title, ep, quality, format) {
     } catch(error) {
         throw error;
     }
+    const $ = cheerio.load(html);
 
     let tr = $(html).find("table:first-child tbody tr");
     // Used to avoid/allow searching deeper when we already have a wanted result
