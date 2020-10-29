@@ -151,10 +151,10 @@ exports.downloadAnimeEpisode = async function (client) {
   await AnimeFile.deleteMany({}).exec();
   let mockAnimeInfos = {
     romajiName: "Dogeza de Tanondemita",
-    anilistLink: "https://anilist.co/anime/97940/Black-Clover/",
+    anilistId: "97940",
     imagePath: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx97940-cmgkiM9APwu6.jpg",
     episode: [],
-    status: "releasing",
+    status: "RELEASING",
   };
   log("Creating anime");
   let mockAnime = await animeController.createAnime(mockAnimeInfos);

@@ -34,7 +34,7 @@ const createAnime = async function (animeParam) {
 
 const getAnime = async function (animeId) {
   return new Promise((resolve, reject) => {
-    Anime.findById(animeId, function (err, anime) {
+    Anime.findOne({ anilistId: animeId }, function (err, anime) {
       if (err) reject(err);
       resolve(anime);
     });
@@ -43,10 +43,7 @@ const getAnime = async function (animeId) {
 
 const updateAnime = async function (animeId, newParam) {
   return new Promise((resolve, reject) => {
-    Anime.findOneAndUpdate({ _id: animeId }, newParam, { new: true }, function (
-      err,
-      anime
-    ) {
+    Anime.findOneAndUpdate({ anilistId: animeId }, newParam, { new: true }, function (err, anime) {
       if (err) reject(err);
       resolve(anime);
     });
@@ -55,7 +52,7 @@ const updateAnime = async function (animeId, newParam) {
 
 const deleteAnime = async function (animeId) {
   return new Promise((resolve, reject) => {
-    Anime.deleteOne({ _id: animeId }, function (err) {
+    Anime.deleteOne({ anilistId: animeId }, function (err) {
       if (err) reject(err);
       resolve(true);
     });
@@ -119,9 +116,7 @@ api.update_anime = function (req, res) {
 
 api.delete_anime = function (req, res) {
   deleteAnime(req.params.animeId)
-    .then((res) =>
-      res.json({ status: 200, message: "Anime successfully deleted" })
-    )
+    .then((res) => res.json({ status: 200, message: "Anime successfully deleted" }))
     .catch((e) => res.send(e));
 };
 

@@ -1,8 +1,6 @@
 "use strict";
 module.exports = function (app) {
   var animeEpisode = require("../controllers/animeEpisodeController");
-  const log = require("../../debug/log").log;
-  log("test2");
   app.route("/animeEpisodes").get(animeEpisode.api.get_all_animeEpisodes).post(animeEpisode.api.create_animeEpisode);
 
   app

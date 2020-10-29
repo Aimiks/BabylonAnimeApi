@@ -1,9 +1,10 @@
 var express = require("express"),
   app = express(),
-  port = process.env.PORT || 3000,
+  port = process.env.PORT || 2727,
   mongoose = require("mongoose"),
   bodyParser = require("body-parser"),
-  WebTorrent = require("webtorrent");
+  WebTorrent = require("webtorrent"),
+  cors = require("cors");
 
 require("./api/models/animeEpisodeModel");
 require("./api/models/animeModel");
@@ -22,7 +23,7 @@ mongoose.connect("mongodb://localhost/BabylonAnime", {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+app.use(cors());
 const animeRoutes = require("./api/routes/animeRoutes"); //importing route
 const animeEpisodeRoutes = require("./api/routes/animeEpisodeRoutes"); //importing route
 animeRoutes(app); //register the route
@@ -35,4 +36,4 @@ app.use(function (req, res) {
 
 console.log("AnimeAPI started on port " + port);
 const client = new WebTorrent();
-mockFunctions.downloadAnimeEpisode(client);
+//mockFunctions.downloadAnimeEpisode(client);

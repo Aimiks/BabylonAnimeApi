@@ -4,10 +4,10 @@ const Schema = mongoose.Schema;
 
 const AnimeSchema = new Schema({
   romajiName: String,
-  anilistLink: String,
+  anilistId: Number,
   imagePath: String,
   episode: [{ type: Schema.Types.ObjectId, ref: "AnimeEpisode" }],
-  status: { type: String, enum: ["releasing", "finished", "unknown"] },
+  status: { type: String, enum: ["RELEASING", "FINISHED", "UNKNOWN"] },
 });
 
 module.exports = mongoose.model("Anime", AnimeSchema);
