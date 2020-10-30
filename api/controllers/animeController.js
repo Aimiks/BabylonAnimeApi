@@ -10,53 +10,31 @@ const mongoose = require("mongoose"),
 // =========================================================
 
 const getAllAnimes = async function () {
-  return new Promise((resolve, reject) => {
-    Anime.find({}, function (err, anime) {
-      if (err) reject(err);
-      resolve(anime);
-    });
-  });
+  return Anime.find({}).exec();
+};
+const countAllAnimes = async function () {
+  return Anime.count({}).exec();
 };
 
 const createAnime = async function (animeParam) {
   if (animeParam.episodeNumber > 0) {
     return createAnimeWithEp(animeParam);
   } else {
-    return new Promise((resolve, reject) => {
-      var new_anime = new Anime(animeParam);
-      new_anime.save(function (err, anime) {
-        if (err) reject(err);
-        resolve(anime);
-      });
-    });
+    var new_anime = new Anime(animeParam);
+    return new_anime.save();
   }
 };
 
 const getAnime = async function (animeId) {
-  return new Promise((resolve, reject) => {
-    Anime.findOne({ anilistId: animeId }, function (err, anime) {
-      if (err) reject(err);
-      resolve(anime);
-    });
-  });
+  return Anime.findOne({ anilistId: animeId }).exec();
 };
 
 const updateAnime = async function (animeId, newParam) {
-  return new Promise((resolve, reject) => {
-    Anime.findOneAndUpdate({ anilistId: animeId }, newParam, { new: true }, function (err, anime) {
-      if (err) reject(err);
-      resolve(anime);
-    });
-  });
+  return Anime.findOneAndUpdate({ anilistId: animeId }, newParam, { new: true }).exec();
 };
 
 const deleteAnime = async function (animeId) {
-  return new Promise((resolve, reject) => {
-    Anime.deleteOne({ anilistId: animeId }, function (err) {
-      if (err) reject(err);
-      resolve(true);
-    });
-  });
+  Anime.deleteOne({ anilistId: animeId }).exec();
 };
 
 const getAnimeEpisodes = async function (animeId) {
@@ -74,7 +52,7 @@ const createAnimeWithEp = async function (animeParam) {
         for (let i = 1; i < episodeNumber; i++) {
           episodes.push({ episodeNumber: i, anime: anime._id });
         }
-        AnimeEpisode.insertMany(episodes);
+        await AnimeEpisode.insertMany(episodes);
         resolve(anime);
       } catch (e) {
         reject(e);
@@ -92,6 +70,12 @@ const createAnimeWithEp = async function (animeParam) {
 let api = {};
 api.get_all_animes = function (req, res) {
   getAllAnimes()
+    .then((items) => res.json(items))
+    .catch((e) => res.send(e));
+};
+
+api.count_all_animes = function (req, res) {
+  countAllAnimes()
     .then((items) => res.json(items))
     .catch((e) => res.send(e));
 };
@@ -135,6 +119,7 @@ api.create_anime_with_ep = function (req, res) {
 module.exports = {
   api,
   getAllAnimes,
+  countAllAnimes,
   createAnime,
   getAnime,
   updateAnime,

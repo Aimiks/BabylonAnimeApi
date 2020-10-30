@@ -8,72 +8,38 @@ const mongoose = require("mongoose"),
 // =========================================================
 
 const getAllAnimeEpisodes = async function () {
-  return new Promise((resolve, reject) => {
-    AnimeEpisode.find({}, function (err, animeEp) {
-      if (err) reject(err);
-      resolve(animeEp);
-    });
-  });
+  return AnimeEpisode.find({}).exec();
 };
 
 const createAnimeEpisode = async function (animeEpParam) {
-  return new Promise((resolve, reject) => {
-    var new_animeEp = new AnimeEpisode(animeEpParam);
-    new_animeEp.save(function (err, animeEp) {
-      if (err) reject(err);
-      resolve(animeEp);
-    });
-  });
+  var new_animeEp = new AnimeEpisode(animeEpParam);
+  return new_animeEp.save();
 };
 
 const getAnimeEpisode = async function (animeEpId) {
-  return new Promise((resolve, reject) => {
-    AnimeEpisode.findById(animeEpId, function (err, animeEp) {
-      if (err) reject(err);
-      resolve(animeEp);
-    });
-  });
+  return AnimeEpisode.findById(animeEpId);
 };
 
 const updateAnimeEpisode = async function (animeEpId, newParam) {
-  return new Promise((resolve, reject) => {
-    AnimeEpisode.findOneAndUpdate(
-      {
-        _id: animeEpId,
-      },
-      newParam,
-      {
-        new: true,
-      },
-      function (err, animeEp) {
-        if (err) reject(err);
-        resolve(animeEp);
-      }
-    );
-  });
+  return AnimeEpisode.findOneAndUpdate(
+    {
+      _id: animeEpId,
+    },
+    newParam,
+    {
+      new: true,
+    }
+  ).exec();
 };
 
 const deleteAnimeEpisode = async function (animeEpId) {
-  return new Promise((resolve, reject) => {
-    AnimeEpisode.deleteOne(
-      {
-        _id: animeEpId,
-      },
-      function (err) {
-        if (err) reject(err);
-        resolve(true);
-      }
-    );
-  });
+  return AnimeEpisode.deleteOne({
+    _id: animeEpId,
+  }).exec();
 };
 
 const getEpisodesFromAnime = async function (animeId) {
-  return new Promise((resolve, reject) => {
-    AnimeEpisode.find({ anime: animeId }, function (err, animeEps) {
-      if (err) reject(err);
-      resolve(animeEps);
-    });
-  });
+  return AnimeEpisode.find({ anime: animeId }).exec();
 };
 
 const getDownloadedFile = async function (animeEpId) {
@@ -87,10 +53,7 @@ const getDownloadedFile = async function (animeEpId) {
   } catch (err) {
     return Promise.reject(err);
   }
-
-  return new Promise((resolve, reject) => {
-    resolve(files);
-  });
+  return new Promise.resolve(files);
 };
 // =========================================================
 // ==================== API FUNCTIONS ======================
@@ -123,9 +86,7 @@ api.update_animeEpisode = function (req, res) {
 
 api.delete_animeEpisode = function (req, res) {
   deleteAnimeEpisode(req.params.animeEpisodeId)
-    .then((res) =>
-      res.json({ status: 200, message: "AnimeEpisode successfully deleted" })
-    )
+    .then((res) => res.json({ status: 200, message: "AnimeEpisode successfully deleted" }))
     .catch((e) => res.send(e));
 };
 

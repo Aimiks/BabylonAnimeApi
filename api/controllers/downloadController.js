@@ -8,69 +8,43 @@ const mongoose = require("mongoose"),
 // =========================================================
 
 const getAllDownloads = async function () {
-  return new Promise((resolve, reject) => {
-    Download.find({}, function (err, download) {
-      if (err) reject(err);
-      resolve(download);
-    });
-  });
+  return Download.find({}).exec();
 };
 
 const createDownload = async function (downloadParam) {
-  return new Promise((resolve, reject) => {
-    var new_download = new Download(downloadParam);
-    new_download.save(function (err, download) {
-      if (err) reject(err);
-      resolve(download);
-    });
-  });
+  const new_download = new Download(downloadParam);
+  return new_download.save();
 };
 
 const getDownload = async function (downloadId) {
-  return new Promise((resolve, reject) => {
-    Download.findById(downloadId, function (err, download) {
-      if (err) reject(err);
-      resolve(download);
-    });
-  });
+  return Download.findById(downloadId).exec();
 };
 
 const updateDownload = async function (downloadId, newParam) {
-  return new Promise((resolve, reject) => {
-    Download.findOneAndUpdate(
-      {
-        _id: downloadId,
-      },
-      newParam,
-      {
-        new: true,
-      },
-      function (err, download) {
-        if (err) reject(err);
-        resolve(download);
-      }
-    );
-  });
+  return Download.findOneAndUpdate(
+    {
+      _id: downloadId,
+    },
+    newParam,
+    {
+      new: true,
+    }
+  ).exec();
 };
 
 const deleteDownload = async function (downloadId) {
-  return new Promise((resolve, reject) => {
-    Download.deleteOne(
-      {
-        _id: downloadId,
-      },
-      function (err) {
-        if (err) reject(err);
-        resolve(true);
-      }
-    );
-  });
+  return Download.deleteOne({
+    _id: downloadId,
+  }).exec();
 };
 
 const getFilesAssociated = async function (downloadId) {
-  return getDownload(downloadId)
-    .then((dl) => dl.downloadedFile)
-    .catch((err) => err);
+  try {
+    const dlFiles = getDownload(downloadId);
+    return Promise.resolve(dlFiles);
+  } catch (e) {
+    return Promise.reject(e);
+  }
 };
 
 module.exports = {

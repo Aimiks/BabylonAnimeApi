@@ -8,63 +8,34 @@ const mongoose = require("mongoose"),
 // =========================================================
 
 const getAllFiles = async function () {
-  return new Promise((resolve, reject) => {
-    File.find({}, function (err, file) {
-      if (err) reject(err);
-      resolve(file);
-    });
-  });
+  return File.find({}).exec();
 };
 
 const createFile = async function (fileParam) {
-  return new Promise((resolve, reject) => {
-    var new_file = new File(fileParam);
-    new_file.save(function (err, file) {
-      if (err) reject(err);
-      resolve(file);
-    });
-  });
+  const new_file = new File(fileParam);
+  return new_file.save();
 };
 
 const getFile = async function (fileId) {
-  return new Promise((resolve, reject) => {
-    File.findById(fileId, function (err, file) {
-      if (err) reject(err);
-      resolve(file);
-    });
-  });
+  return File.findById(fileId).exec();
 };
 
 const updateFile = async function (fileId, newParam) {
-  return new Promise((resolve, reject) => {
-    File.findOneAndUpdate(
-      {
-        _id: fileId,
-      },
-      newParam,
-      {
-        new: true,
-      },
-      function (err, file) {
-        if (err) reject(err);
-        resolve(file);
-      }
-    );
-  });
+  return File.findOneAndUpdate(
+    {
+      _id: fileId,
+    },
+    newParam,
+    {
+      new: true,
+    }
+  ).exec();
 };
 
 const deleteFile = async function (fileId) {
-  return new Promise((resolve, reject) => {
-    File.deleteOne(
-      {
-        _id: fileId,
-      },
-      function (err) {
-        if (err) reject(err);
-        resolve(true);
-      }
-    );
-  });
+  return File.deleteOne({
+    _id: fileId,
+  }).exec();
 };
 
 module.exports = {
