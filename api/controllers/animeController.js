@@ -13,7 +13,7 @@ const getAllAnimes = async function () {
   return Anime.find({}).exec();
 };
 const countAllAnimes = async function () {
-  return Anime.count({}).exec();
+  return Anime.countDocuments({}).exec();
 };
 
 const createAnime = async function (animeParam) {
@@ -26,15 +26,15 @@ const createAnime = async function (animeParam) {
 };
 
 const getAnime = async function (animeId) {
-  return Anime.findOne({ anilistId: animeId }).exec();
+  return Anime.findOne({ id: animeId }).exec();
 };
 
 const updateAnime = async function (animeId, newParam) {
-  return Anime.findOneAndUpdate({ anilistId: animeId }, newParam, { new: true }).exec();
+  return Anime.findOneAndUpdate({ id: animeId }, newParam, { new: true }).exec();
 };
 
 const deleteAnime = async function (animeId) {
-  Anime.deleteOne({ anilistId: animeId }).exec();
+  return Anime.deleteOne({ id: animeId }).exec();
 };
 
 const getAnimeEpisodes = async function (animeId) {

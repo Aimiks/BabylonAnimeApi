@@ -151,15 +151,13 @@ exports.downloadAnimeEpisode = async function (client) {
   await AnimeFile.deleteMany({}).exec();
   let mockAnimeInfos = {
     romajiName: "Dogeza de Tanondemita",
-    anilistId: "97940",
-    imagePath: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx97940-cmgkiM9APwu6.jpg",
+    id: "97940",
     episode: [],
-    status: "RELEASING",
   };
   log("Creating anime");
   let mockAnime = await animeController.createAnime(mockAnimeInfos);
   const mockAnimeFilter = {
-    animeId: mockAnime._id,
+    animeId: mockAnime.id,
     title: "Dogeza de Tanondemita",
     ep: 3,
     quality: 480,
