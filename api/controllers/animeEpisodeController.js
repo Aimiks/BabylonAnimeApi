@@ -38,8 +38,15 @@ const deleteAnimeEpisode = async function (animeEpId) {
   }).exec();
 };
 
-const getEpisodesFromAnime = async function (animeId) {
-  return AnimeEpisode.find({ anime: animeId }).exec();
+const addDownload = async function (animeEpId, downloadParam) {
+  return AnimeEpisode.findOneAndUpdate(
+    {
+      _id: animeEpId,
+    },
+    {
+      $push: { download: downloadParam },
+    }
+  ).exec();
 };
 
 const getDownloadedFile = async function (animeEpId) {
@@ -97,6 +104,6 @@ module.exports = {
   getAnimeEpisode,
   updateAnimeEpisode,
   deleteAnimeEpisode,
-  getEpisodesFromAnime,
   getDownloadedFile,
+  addDownload,
 };

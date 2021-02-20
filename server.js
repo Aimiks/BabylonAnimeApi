@@ -13,6 +13,7 @@ require("./api/models/downloadModel");
 
 const mockFunctions = require("./api/utils/mockFunctions");
 const log = require("./debug/log").log;
+const downloader = require("./downloader/downloader");
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost/BabylonAnime", {
@@ -36,4 +37,5 @@ app.use(function (req, res) {
 
 console.log("AnimeAPI started on port " + port);
 const client = new WebTorrent();
+downloader.startDownload(client);
 //mockFunctions.downloadAnimeEpisode(client);

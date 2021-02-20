@@ -1,5 +1,7 @@
 "use strict";
 
+const animeModel = require("../models/animeModel");
+
 const mongoose = require("mongoose"),
   Anime = mongoose.model("Anime"),
   AnimeEpisode = mongoose.model("AnimeEpisode"),
@@ -38,7 +40,21 @@ const deleteAnime = async function (animeId) {
 };
 
 const getAnimeEpisodes = async function (animeId) {
-  return animeEpisodeDAO.getEpisodesFromAnime(animeId);
+  return Anime.findOne({ id: animeId }, { episodes: 1, _id: 0 }).populate("episodes").exec();
+};
+
+const addAnimeEpisode = async function (animeId, episodeParam) {
+  if (!Array.isArray(episodeParam)) {
+    episodeParam = [episodeParam];
+  }
+  return Anime.findOneAndUpdate(
+    {
+      _id: animeId,
+    },
+    {
+      $push: { episodes: { $each: episodeParam } },
+    }
+  ).exec();
 };
 
 const createAnimeWithEp = async function (animeParam) {
@@ -126,4 +142,5 @@ module.exports = {
   deleteAnime,
   getAnimeEpisodes,
   createAnimeWithEp,
+  addAnimeEpisode,
 };
