@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model File {
+  id         Int        @id @default(autoincrement())
+  name       String
+  path       String
+  type       String
+  size       Int
+  resolution Int
+  download   Download[]
+}
+
+model Download {
+  id             Int           @id @default(autoincrement())
+  status         String
+  downloadedFile File?         @relation(fields: [fileId], references: [id])
+  progress       Float         @default(0.0)
+  animeEpisode   AnimeEpisode? @relation(fields: [animeEpisodeId], references: [id])
+  animeEpisodeId Int?
+  fileId         Int?
+}
+
+model AnimeEpisode {
+  id            Int        @id @default(autoincrement())
+  episodeNumber Int
+  download      Download[]
+  anime         Anime?     @relation(fields: [animeId], references: [id])
+  animeId       Int?
+}
+
+model Anime {
+  id       Int            @id
+  episodes AnimeEpisode[]
+}

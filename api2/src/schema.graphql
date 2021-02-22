@@ -1,0 +1,43 @@
+type Query {
+  Animes: [Anime!]!
+  Anime(id: Int!): Anime
+}
+
+type Mutation {
+  AddAnime(id: Int!): Anime!
+  CreateAnimeEpisode(id: Int!, episodeNumber: Int!): AnimeEpisode!
+}
+
+type File {
+  id: Int!
+  name: String!
+  path: String!
+  type: String!
+  size: Int!
+  resolution: Int!
+  download: [Download]
+}
+type Download {
+  id: Int!
+  status: DownloadStatus
+  downloadedFile: File
+  progress: Float
+  episode: AnimeEpisode
+}
+
+type AnimeEpisode {
+  id: Int!
+  episodeNumber: Int
+  download: [Download]
+  anime: Anime
+}
+type Anime {
+  id: Int!
+  episodes: [AnimeEpisode]
+}
+
+enum DownloadStatus {
+  UNKNOWN
+  DOWNLOADING
+  FINISHED
+}
