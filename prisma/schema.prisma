@@ -21,13 +21,13 @@ model File {
 }
 
 model Download {
-  id             Int           @id @default(autoincrement())
-  status         String
-  downloadedFile File?         @relation(fields: [fileId], references: [id])
-  progress       Float         @default(0.0)
-  animeEpisode   AnimeEpisode? @relation(fields: [animeEpisodeId], references: [id])
-  animeEpisodeId Int?
-  fileId         Int?
+  id               Int           @id @default(autoincrement())
+  status           String
+  downloadedFile   File?         @relation(fields: [downloadedFileId], references: [id])
+  progress         Float         @default(0.0)
+  animeEpisode     AnimeEpisode? @relation(fields: [animeEpisodeId], references: [id])
+  animeEpisodeId   Int?
+  downloadedFileId Int?
 }
 
 model AnimeEpisode {

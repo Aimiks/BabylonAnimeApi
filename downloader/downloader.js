@@ -1,13 +1,15 @@
-const AnimeDAO = require("../api/controllers/animeController"),
+/*const AnimeDAO = require("../api/controllers/animeController"),
   AnimeEpisodeDAO = require("../api/controllers/animeEpisodeController"),
   DownloadDAO = require("../api/controllers/downloadController"),
-  FileDAO = require("../api/controllers/fileController"),
-  { searchAnimeOnNya, searchAnimeOnNyaEnhanced } = require("./utils/scrapperFunctions"),
+  FileDAO = require("../api/controllers/fileController"),*/
+const { searchAnimeOnNya, searchAnimeOnNyaEnhanced } = require("./utils/scrapperFunctions"),
   { downloadFiles } = require("./utils/torrentFunctions"),
   { asyncForEach } = require("./utils/asyncFunctions"),
   log = require("../debug/log").log,
   anilist = require("../services/anilist"),
   { getLastEpisodeUp } = require("./utils/animesFunctions");
+
+const ctrl = require("../prisma/controllers/all");
 
 let current_downloading = {};
 
@@ -19,14 +21,14 @@ exports.startDownload = function (client) {
 let tryDownloadAnimes = async function (client) {
   log("Try downloading");
   // Get all animes that needs to be downloaded
-  const animes = await AnimeDAO.getAllAnimes();
+  const animes = await ctrl.anime.getAll();
   // Get all the infos form anilist
   const animesInfos = await anilist.getAnimes(animes.map((a) => a.id));
   const animesRequest = [];
   await asyncForEach(animesInfos, async (a) => {
     let wantedEpisodesList = [];
     const MAX_EP = a.nextAiringEpisode ? a.nextAiringEpisode.episode : a.episodes;
-    let downloadedEp = (await AnimeDAO.getAnimeEpisodes(a.id)).episodes;
+    let downloadedEp = (await ctrl.anime.getEpisodes(a.id)).episodes.map((e) => e.episodeNumber);
     // This check allow us to not trying to dowload ep
     // that are / will be tried
     if (current_downloading[a.id]) {
@@ -37,14 +39,14 @@ let tryDownloadAnimes = async function (client) {
     if (MAX_EP < 24) {
       if (downloadedEp.length) {
         wantedEpisodesList = Array.from({ length: MAX_EP }, (v, k) =>
-          downloadedEp.findIndex((de) => de.episodeNumber == k + 1) > -1 ? 0 : k + 1
+          downloadedEp.findIndex((de) => de == k + 1) > -1 ? 0 : k + 1
         ).filter((ep) => ep !== 0);
       } else {
         wantedEpisodesList = Array.from({ length: MAX_EP }, (v, k) => k + 1);
       }
     } else {
       let t_ep = getLastEpisodeUp(a).episode;
-      if (downloadedEp.findIndex((de) => de.episodeNumber == t_ep) === -1) {
+      if (downloadedEp.findIndex((de) => de == t_ep) === -1) {
         wantedEpisodesList.push(t_ep);
       }
     }
@@ -110,13 +112,14 @@ let downloadAnimeEpisode = async function (client, animeId, title, ep, quality, 
       let animesEpisodeFiles = [];
       // get the anime with the animeId
       log(`[${titleStr} - ${ep}] Getting anime from animeId`);
-      let anime = await AnimeDAO.getAnime(animeId);
+      let anime = await ctrl.anime.get(animeId);
       // create an animeEpisode from the file info
       let animeEpisodeInfo = {
         episodeNumber: ep,
       };
-      let animeEp = await AnimeEpisodeDAO.createAnimeEpisode(animeEpisodeInfo);
-      AnimeDAO.addAnimeEpisode(anime, animeEp);
+      let animeEp = await ctrl.animeepisode.create(animeEpisodeInfo);
+      log(`[${titleStr} - ${ep}] Creating an anime ep`);
+      await ctrl.anime.addEpisode(animeId, animeEp.id);
       let downloadByFiles = [];
       /* ============================================================================
        * Creation of download, files and update progress
@@ -124,27 +127,25 @@ let downloadAnimeEpisode = async function (client, animeId, title, ep, quality, 
       await asyncForEach(files, async (file) => {
         // create a download
         let downloadInfo = {
-          status: "unknown",
-          downloadedFile: null,
+          status: "UNKNOWN",
         };
         log(`[${titleStr} - ${ep}] Creating a download`);
-        let download = await DownloadDAO.createDownload(downloadInfo);
+        let download = await ctrl.download.create(downloadInfo);
         // Add the download to the current ep
-        await AnimeEpisodeDAO.addDownload(animeEp, download);
+        await ctrl.animeepisode.addDownload(animeEp.id, download.id);
         // store it to animeEpisodes
-        log(`[${titleStr} - ${ep}] Creating an anime ep`);
         animesEpisodeFiles.push({
           fileName: file.name,
           ep: animeEp,
         });
-        downloadByFiles.push({ file, download });
+        downloadByFiles.push({ file, downloadId: download.id });
       });
       // every minutes check file dl progress
       let idIntervalCheckProgress = setInterval(() => {
         downloadByFiles.forEach((obj) => {
           // update download progress
           log(`[${titleStr} - ${ep}] progress : ` + obj.file.progress);
-          DownloadDAO.updateDownload(obj.download, {
+          ctrl.download.update(obj.downloadId, {
             progress: obj.file.progress,
           });
         });
@@ -157,25 +158,29 @@ let downloadAnimeEpisode = async function (client, animeId, title, ep, quality, 
       await dlPromisesObj.downloadDonePromise;
       clearInterval(idIntervalCheckProgress);
       downloadByFiles.forEach(async (obj) => {
-        log(`[${titleStr} - ${ep}] Creating a file`);
-        let file = obj.file;
-        // create a file
-        let fileInfo = {
-          name: file.name,
-          path: file.path,
-          type: file.name.split(".").slice(-1)[0],
-          size: file.length,
-          resolution: typeof quality === String ? parseInt(quality.replace(new RegExp(/\D/g), "")) : quality,
-        };
-        let realFile = await FileDAO.createFile(fileInfo);
-        // set the dowload progress to 100%
-        //                    status to complete
-        log(`[${titleStr} - ${ep}] Set downloads status to complete`);
-        DownloadDAO.updateDownload(obj.download, {
-          progress: 1,
-          status: "complete",
-          downloadedFile: realFile._id,
-        });
+        try {
+          log(`[${titleStr} - ${ep}] Creating a file`);
+          let file = obj.file;
+          // create a file
+          let fileInfo = {
+            name: file.name,
+            path: file.path,
+            type: file.name.split(".").slice(-1)[0],
+            size: file.length,
+            resolution: typeof quality === String ? parseInt(quality.replace(new RegExp(/\D/g), "")) : quality,
+          };
+          let realFile = await ctrl.file.create(fileInfo);
+          // set the dowload progress to 100%
+          //                    status to complete
+          log(`[${titleStr} - ${ep}] Set downloads status to complete`);
+          await ctrl.download.update(obj.downloadId, {
+            progress: 1,
+            status: "COMPLETE",
+            downloadedFileId: realFile.id,
+          });
+        } catch (e) {
+          console.error(e);
+        }
       });
     } else {
       log(`[${titleStr} - ${ep}] Anime not found !`);

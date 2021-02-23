@@ -33,9 +33,14 @@ exports.downloadFiles = function (client, magnet, name) {
   } catch (e) {
     //directory already exists
   }
-  let torrent = client.add(magnet, { path: `/#Dev/AnimeDownloaderServer/BabylonAnimeApi/files/${name}` });
+  let torrent;
+  try {
+    torrent = client.add(magnet, { path: `/#Dev/AnimeDownloaderServer/BabylonAnimeApi/files/${name}` });
+  } catch (e) {
+    return [Promise.reject(), Promise.reject()];
+  }
   let promises = { filesPromise: null, downloadDonePromise: null };
-
+  console.log("[Torrent] attach ready event");
   promises.filesPromise = new Promise((resolve) => {
     torrent.on("ready", function () {
       torrent.files.forEach((f) => f.deselect());

@@ -27,5 +27,6 @@ files/
 
 #db
 /prisma/migrations/*
+/prisma/*.db
 
 *.lock
